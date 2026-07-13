@@ -1,0 +1,28 @@
+name: EnvelopeBudget
+
+options:
+  bundleIdPrefix: com.artem
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+
+targets:
+  EnvelopeBudget:
+    type: application
+    platform: iOS
+    sources:
+      - path: Sources
+    info:
+      path: Supporting/Info.plist
+      properties:
+        CFBundleDisplayName: Конверты
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.artem.envelopebudget
+        MARKETING_VERSION: "0.1"
+        CURRENT_PROJECT_VERSION: "1"
+        SWIFT_VERSION: "5.0"
+        TARGETED_DEVICE_FAMILY: "1"
