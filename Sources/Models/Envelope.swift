@@ -5,22 +5,29 @@ import SwiftData
 final class Envelope {
     var name: String
     var plannedAmount: Decimal
-
-    /// Пока всегда 0 — ввода трат ещё нет.
-    /// Со следующей стори станет суммой трат, привязанных к конверту.
-    var spentAmount: Decimal
-
     var createdAt: Date
+
+    /// Категория по умолчанию для новых трат. Одновременно true — только у одного конверта.
+    var isDefault: Bool = false
+
+    /// Траты, привязанные к конверту. Удаление конверта уносит и его траты.
+    @Relationship(deleteRule: .cascade, inverse: \Spend.envelope)
+    var spends: [Spend] = []
 
     init(name: String, plannedAmount: Decimal) {
         self.name = name
         self.plannedAmount = plannedAmount
-        self.spentAmount = 0
         self.createdAt = .now
+        self.isDefault = false
     }
 }
 
 extension Envelope {
+    /// Сумма всех трат конверта. Меняется автоматически при вводе/правке/отмене трат.
+    var spentAmount: Decimal {
+        spends.reduce(0) { $0 + $1.amount }
+    }
+
     var remainingAmount: Decimal {
         plannedAmount - spentAmount
     }

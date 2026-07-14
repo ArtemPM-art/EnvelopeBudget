@@ -8,6 +8,7 @@ struct EnvelopeListView: View {
     private var envelopes: [Envelope]
 
     @State private var route: EditorRoute?
+    @State private var isEnteringSpend = false
 
     var body: some View {
         NavigationStack {
@@ -23,9 +24,27 @@ struct EnvelopeListView: View {
                         }
                     }
                 }
+                .safeAreaInset(edge: .bottom) {
+                    if !envelopes.isEmpty {
+                        Button {
+                            isEnteringSpend = true
+                        } label: {
+                            Label("Внести трату", systemImage: "cart.badge.plus")
+                                .font(.headline)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 6)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 8)
+                    }
+                }
         }
         .sheet(item: $route) { route in
             EnvelopeEditorView(mode: route.mode, context: context)
+        }
+        .fullScreenCover(isPresented: $isEnteringSpend) {
+            SpendEntryView(context: context)
         }
     }
 
