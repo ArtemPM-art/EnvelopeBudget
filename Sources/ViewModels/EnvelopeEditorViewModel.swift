@@ -33,6 +33,11 @@ final class EnvelopeEditorViewModel {
         return nil
     }
 
+    /// Сколько трат уже привязано к редактируемому конверту.
+    var editedEnvelopeSpendCount: Int {
+        editedEnvelope?.spends.count ?? 0
+    }
+
     var title: String {
         editedEnvelope?.name ?? "Новый конверт"
     }
@@ -76,8 +81,22 @@ final class EnvelopeEditorViewModel {
         return commit(failureMessage: "Не удалось сохранить конверт.")
     }
 
-    func delete() -> Bool {
+    /// Удалить конверт вместе со всеми его тратами (каскадное удаление).
+    func deleteWithSpends() -> Bool {
         guard let envelope = editedEnvelope else { return false }
+        context.delete(envelope)
+        return commit(failureMessage: "Не удалось удалить конверт.")
+    }
+
+    /// Удалить конверт, но сохранить траты: они станут нераспределёнными
+    /// (envelope = nil), перестанут влиять на бюджет и их можно вернуть в другой конверт.
+    func deleteKeepingSpends() -> Bool {
+        guard let envelope = editedEnvelope else { return false }
+        // Снимаем траты с конверта до его удаления, иначе каскад унесёт их с собой.
+        let attachedSpends = envelope.spends
+        for spend in attachedSpends {
+            spend.envelope = nil
+        }
         context.delete(envelope)
         return commit(failureMessage: "Не удалось удалить конверт.")
     }

@@ -74,17 +74,36 @@ struct EnvelopeEditorView: View {
                     .disabled(!viewModel.canSave)
                 }
             }
-            .confirmationDialog(
+            .alert(
                 "Удалить «\(viewModel.editedEnvelope?.name ?? "")»?",
-                isPresented: $isConfirmingDelete,
-                titleVisibility: .visible
+                isPresented: $isConfirmingDelete
             ) {
-                Button("Удалить конверт", role: .destructive) {
-                    if viewModel.delete() { dismiss() }
+                if viewModel.editedEnvelopeSpendCount > 0 {
+                    Button("Оставить траты", role: .destructive) {
+                        if viewModel.deleteKeepingSpends() { dismiss() }
+                    }
+                    Button("Удалить с тратами", role: .destructive) {
+                        if viewModel.deleteWithSpends() { dismiss() }
+                    }
+                    Button("Отмена", role: .cancel) {}
+                } else {
+                    Button("Удалить конверт", role: .destructive) {
+                        if viewModel.deleteWithSpends() { dismiss() }
+                    }
+                    Button("Отмена", role: .cancel) {}
                 }
-                Button("Отмена", role: .cancel) {}
             } message: {
-                Text("Конверт исчезнет из списка. Вернуть его будет нельзя.")
+                if viewModel.editedEnvelopeSpendCount > 0 {
+                    Text(
+                        """
+                        Трат в этом конверте: \(viewModel.editedEnvelopeSpendCount). Выберите, что с ними сделать.
+                        «Оставить траты» — конверт удалится, а траты станут нераспределёнными: перестанут влиять на бюджет, потом их можно вернуть в другой конверт.
+                        «Удалить с тратами» — конверт и его траты удалятся безвозвратно.
+                        """
+                    )
+                } else {
+                    Text("Конверт исчезнет из списка. Вернуть его будет нельзя.")
+                }
             }
         }
     }
