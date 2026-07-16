@@ -64,7 +64,7 @@ struct EventEnvelopeSpendsView: View {
                                 Text("Всего по конверту")
                                 Spacer()
                                 Text(MoneyFormatter.string(from: total))
-                                    .foregroundStyle(.ebOrange)
+                                    .foregroundStyle(Color.ebOrange)
                             }
                             .font(.subheadline.weight(.medium))
                         }
