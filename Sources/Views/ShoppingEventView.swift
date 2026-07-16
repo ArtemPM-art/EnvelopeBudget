@@ -53,7 +53,7 @@ struct ShoppingEventView: View {
         case .addSpend:
             EventSpendEntryView(event: viewModel.event, context: context)
         case let .envelopeSpends(envelope):
-            EventEnvelopeSpendsView(envelope: envelope, event: viewModel.event, context: context)
+            EventEnvelopeSpendsView(envelope: envelope, event: viewModel.event)
         case let .checkout(lines, total):
             EventCheckoutView(lines: lines, total: total) {
                 finishPay()
