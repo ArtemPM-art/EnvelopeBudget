@@ -59,6 +59,8 @@ struct EventCheckoutView: View {
                     Text("Провести оплату · \(MoneyFormatter.string(from: total))")
                         .font(.headline)
                         .foregroundStyle(.black)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
                         .background(Color.ebGreen)
@@ -81,17 +83,21 @@ struct EventCheckoutView: View {
     }
 
     private func checkoutRow(_ line: DraftLine) -> some View {
-        HStack {
+        HStack(spacing: 8) {
             Image(systemName: "cart")
                 .foregroundStyle(.secondary)
             Text(line.name)
-            Spacer()
+                .lineLimit(1)
+            Spacer(minLength: 6)
             Text("−\(MoneyFormatter.string(from: line.spend))")
                 .font(.body.weight(.semibold))
+                .lineLimit(1)
+                .fixedSize(horizontal: true, vertical: false)
             Text("→ \(MoneyFormatter.string(from: line.after))")
                 .font(.footnote)
                 .foregroundStyle(line.isOverspent ? Color.ebRed : Color.secondary)
-                .frame(minWidth: 78, alignment: .trailing)
+                .lineLimit(1)
+                .fixedSize(horizontal: true, vertical: false)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 14)

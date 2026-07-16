@@ -126,23 +126,20 @@ struct ShoppingEventView: View {
 
     private func draftCard(_ draft: EnvelopeDraft) -> some View {
         VStack(spacing: 8) {
-            HStack(spacing: 9) {
+            HStack(spacing: 8) {
                 Image(systemName: "cart")
                     .foregroundStyle(Color.ebBlue)
                 Text(draft.envelope.name)
                     .font(.headline)
                     .foregroundStyle(.primary)
-                Text("ЧЕРНОВИК")
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 3)
-                    .background(Color(.tertiarySystemGroupedBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
-                Spacer()
+                    .lineLimit(1)
+                draftBadge
+                Spacer(minLength: 6)
                 Text("−\(MoneyFormatter.string(from: draft.spend))")
                     .font(.headline)
                     .foregroundStyle(Color.ebOrange)
+                    .lineLimit(1)
+                    .fixedSize(horizontal: true, vertical: false)
                 Image(systemName: "chevron.right")
                     .font(.caption)
                     .foregroundStyle(.tertiary)
@@ -150,26 +147,42 @@ struct ShoppingEventView: View {
 
             Divider()
 
-            HStack {
+            HStack(spacing: 6) {
                 Text("после оплаты останется")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
-                Spacer()
+                Spacer(minLength: 6)
                 Text(MoneyFormatter.string(from: draft.wasRemaining))
                     .font(.caption)
                     .foregroundStyle(.tertiary)
                     .strikethrough()
+                    .lineLimit(1)
+                    .fixedSize(horizontal: true, vertical: false)
                 Image(systemName: "arrow.right")
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
                 Text(MoneyFormatter.string(from: draft.afterRemaining))
-                    .font(.headline)
+                    .font(.subheadline.weight(.semibold))
                     .foregroundStyle(draft.isOverspent ? Color.ebRed : Color.primary)
+                    .lineLimit(1)
+                    .fixedSize(horizontal: true, vertical: false)
             }
         }
         .padding(14)
         .background(Color(.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+    }
+
+    private var draftBadge: some View {
+        Text("ЧЕРНОВИК")
+            .font(.caption2.weight(.semibold))
+            .lineLimit(1)
+            .fixedSize()
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 3)
+            .background(Color(.tertiarySystemGroupedBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
     }
 
     private var emptyCart: some View {
@@ -202,8 +215,9 @@ struct ShoppingEventView: View {
                     Text("Отменить")
                         .font(.headline)
                         .foregroundStyle(Color.ebRed)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                        .frame(maxWidth: .infinity, minHeight: 52)
                         .background(Color(.secondarySystemGroupedBackground))
                         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                 }
@@ -215,8 +229,9 @@ struct ShoppingEventView: View {
                     Text("Оплатить · \(MoneyFormatter.string(from: viewModel.cartTotal))")
                         .font(.headline)
                         .foregroundStyle(.black)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.65)
+                        .frame(maxWidth: .infinity, minHeight: 52)
                         .background(viewModel.isEmpty ? Color.ebGreen.opacity(0.4) : Color.ebGreen)
                         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                 }
