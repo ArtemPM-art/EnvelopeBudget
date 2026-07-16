@@ -17,6 +17,7 @@ struct EnvelopeBudgetApp: App {
     var body: some Scene {
         WindowGroup {
             EnvelopeListView()
+                .tint(.ebBlue)
         }
         .modelContainer(container)
     }

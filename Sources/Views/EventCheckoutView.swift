@@ -58,13 +58,17 @@ struct EventCheckoutView: View {
                 } label: {
                     Text("Провести оплату · \(MoneyFormatter.string(from: total))")
                         .font(.headline)
+                        .foregroundStyle(.black)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
+                        .padding(.vertical, 14)
+                        .background(Color.ebGreen)
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(.green)
+                .buttonStyle(.plain)
                 .padding(.horizontal, 16)
+                .padding(.top, 8)
                 .padding(.bottom, 8)
+                .background(.bar)
             }
             .navigationTitle("Закрытие события")
             .navigationBarTitleDisplayMode(.inline)
@@ -86,7 +90,7 @@ struct EventCheckoutView: View {
                 .font(.body.weight(.semibold))
             Text("→ \(MoneyFormatter.string(from: line.after))")
                 .font(.footnote)
-                .foregroundStyle(line.isOverspent ? Color.red : Color.secondary)
+                .foregroundStyle(line.isOverspent ? Color.ebRed : Color.secondary)
                 .frame(minWidth: 78, alignment: .trailing)
         }
         .padding(.horizontal, 16)
@@ -96,14 +100,14 @@ struct EventCheckoutView: View {
     private var overspendWarning: some View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundStyle(.orange)
+                .foregroundStyle(Color.ebOrange)
             Text(overspendMessage)
                 .font(.footnote)
                 .foregroundStyle(.primary)
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.orange.opacity(0.15))
+        .background(Color.ebOrange.opacity(0.15))
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
 

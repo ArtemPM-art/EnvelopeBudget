@@ -15,7 +15,7 @@ struct SpendRowView: View {
             if let name = spend.envelope?.name {
                 categoryChip(text: name, tint: .secondary, filled: false)
             } else {
-                categoryChip(text: "Не распределена", tint: .orange, filled: true)
+                categoryChip(text: "Не распределена", tint: .ebOrange, filled: true)
             }
         }
         .contentShape(Rectangle())

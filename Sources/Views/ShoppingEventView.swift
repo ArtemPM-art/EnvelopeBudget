@@ -8,9 +8,8 @@ struct ShoppingEventView: View {
     @Environment(\.modelContext) private var context
 
     @State private var viewModel: ShoppingEventViewModel
-    @State private var isAddingSpend = false
+    @State private var sheet: EventSheet?
     @State private var isConfirmingCancel = false
-    @State private var checkout: CheckoutData?
     /// Пока true — событие закрывается: не читаем удаляемую модель во время анимации.
     @State private var isFinishing = false
 
@@ -34,19 +33,30 @@ struct ShoppingEventView: View {
                     Button("Свернуть") { dismiss() }
                 }
             }
-            .sheet(isPresented: $isAddingSpend) {
-                EventSpendEntryView(event: viewModel.event, context: context)
-            }
-            .sheet(item: $checkout) { data in
-                EventCheckoutView(lines: data.lines, total: data.total) {
-                    finishPay()
-                }
+            .sheet(item: $sheet) { sheet in
+                sheetContent(sheet)
             }
             .alert("Отменить событие «Шопинг»?", isPresented: $isConfirmingCancel) {
                 Button("Отменить событие", role: .destructive) { finishCancel() }
                 Button("Продолжить покупки", role: .cancel) {}
             } message: {
                 Text("Все траты из корзины (\(MoneyFormatter.string(from: viewModel.cartTotal))) откатятся. Конверты останутся без изменений — деньги не списывались.")
+            }
+        }
+    }
+
+    // MARK: - Sheets
+
+    @ViewBuilder
+    private func sheetContent(_ sheet: EventSheet) -> some View {
+        switch sheet {
+        case .addSpend:
+            EventSpendEntryView(event: viewModel.event, context: context)
+        case let .envelopeSpends(envelope):
+            EventEnvelopeSpendsView(envelope: envelope, event: viewModel.event, context: context)
+        case let .checkout(lines, total):
+            EventCheckoutView(lines: lines, total: total) {
+                finishPay()
             }
         }
     }
@@ -70,7 +80,12 @@ struct ShoppingEventView: View {
                         emptyCart
                     } else {
                         ForEach(viewModel.drafts) { draft in
-                            draftCard(draft)
+                            Button {
+                                sheet = .envelopeSpends(draft.envelope)
+                            } label: {
+                                draftCard(draft)
+                            }
+                            .buttonStyle(.plain)
                         }
                     }
                 }
@@ -82,10 +97,10 @@ struct ShoppingEventView: View {
 
     private var eventBadge: some View {
         HStack(spacing: 8) {
-            Circle().fill(.green).frame(width: 9, height: 9)
+            Circle().fill(Color.ebGreen).frame(width: 9, height: 9)
             Text("СОБЫТИЕ ИДЁТ")
                 .font(.caption.weight(.semibold))
-                .foregroundStyle(.green)
+                .foregroundStyle(Color.ebGreen)
         }
     }
 
@@ -113,9 +128,10 @@ struct ShoppingEventView: View {
         VStack(spacing: 8) {
             HStack(spacing: 9) {
                 Image(systemName: "cart")
-                    .foregroundStyle(.tint)
+                    .foregroundStyle(Color.ebBlue)
                 Text(draft.envelope.name)
                     .font(.headline)
+                    .foregroundStyle(.primary)
                 Text("ЧЕРНОВИК")
                     .font(.caption2.weight(.semibold))
                     .foregroundStyle(.secondary)
@@ -126,7 +142,10 @@ struct ShoppingEventView: View {
                 Spacer()
                 Text("−\(MoneyFormatter.string(from: draft.spend))")
                     .font(.headline)
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(Color.ebOrange)
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
             }
 
             Divider()
@@ -145,7 +164,7 @@ struct ShoppingEventView: View {
                     .foregroundStyle(.tertiary)
                 Text(MoneyFormatter.string(from: draft.afterRemaining))
                     .font(.headline)
-                    .foregroundStyle(draft.isOverspent ? Color.red : Color.primary)
+                    .foregroundStyle(draft.isOverspent ? Color.ebRed : Color.primary)
             }
         }
         .padding(14)
@@ -164,48 +183,55 @@ struct ShoppingEventView: View {
     private var bottomActions: some View {
         VStack(spacing: 10) {
             Button {
-                isAddingSpend = true
+                sheet = .addSpend
             } label: {
                 Label("Добавить трату в корзину", systemImage: "plus")
                     .font(.subheadline.weight(.medium))
+                    .foregroundStyle(Color.ebBlue)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 6)
+                    .padding(.vertical, 10)
+                    .background(Color(.secondarySystemGroupedBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             }
-            .buttonStyle(.bordered)
+            .buttonStyle(.plain)
 
             HStack(spacing: 10) {
-                Button(role: .destructive) {
+                Button {
                     isConfirmingCancel = true
                 } label: {
                     Text("Отменить")
                         .font(.headline)
+                        .foregroundStyle(Color.ebRed)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
+                        .padding(.vertical, 12)
+                        .background(Color(.secondarySystemGroupedBackground))
+                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                 }
-                .buttonStyle(.bordered)
-                .tint(.red)
+                .buttonStyle(.plain)
 
                 Button {
-                    checkout = CheckoutData(lines: viewModel.draftLines(), total: viewModel.cartTotal)
+                    sheet = .checkout(lines: viewModel.draftLines(), total: viewModel.cartTotal)
                 } label: {
                     Text("Оплатить · \(MoneyFormatter.string(from: viewModel.cartTotal))")
                         .font(.headline)
+                        .foregroundStyle(.black)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
+                        .padding(.vertical, 12)
+                        .background(viewModel.isEmpty ? Color.ebGreen.opacity(0.4) : Color.ebGreen)
+                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(.green)
+                .buttonStyle(.plain)
                 .disabled(viewModel.isEmpty)
             }
         }
         .padding(16)
-        .background(.bar)
+        .background(Color(.systemGroupedBackground))
     }
 
     // MARK: - Finish
 
     private func finishPay() {
-        checkout = nil
+        sheet = nil
         isFinishing = true
         viewModel.payAndClose()
         dismiss()
@@ -218,9 +244,20 @@ struct ShoppingEventView: View {
     }
 }
 
-/// Снимок корзины для экрана оплаты.
-private struct CheckoutData: Identifiable {
-    let id = UUID()
-    let lines: [DraftLine]
-    let total: Decimal
+/// Что показываем поверх экрана события. Один источник — чтобы презентации не конфликтовали.
+private enum EventSheet: Identifiable {
+    case addSpend
+    case envelopeSpends(Envelope)
+    case checkout(lines: [DraftLine], total: Decimal)
+
+    var id: String {
+        switch self {
+        case .addSpend:
+            return "add"
+        case let .envelopeSpends(envelope):
+            return "env-\(envelope.persistentModelID)"
+        case .checkout:
+            return "checkout"
+        }
+    }
 }

@@ -19,6 +19,7 @@ struct EnvelopeListView: View {
         NavigationStack {
             content
                 .navigationTitle("Конверты")
+                .navigationBarTitleDisplayMode(.inline)
                 .background(Color(.systemGroupedBackground))
                 .toolbar {
                     ToolbarItem(placement: .primaryAction) {
@@ -51,6 +52,7 @@ struct EnvelopeListView: View {
                     .padding(.vertical, 8)
             }
             .buttonStyle(.borderedProminent)
+            .tint(.ebBlue)
             .fullScreenCover(item: $shoppingEvent) { event in
                 ShoppingEventView(event: event, context: context)
             }
@@ -60,16 +62,21 @@ struct EnvelopeListView: View {
             } label: {
                 Label("Внести одну трату", systemImage: "plus")
                     .font(.subheadline.weight(.medium))
+                    .foregroundStyle(Color.ebBlue)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 4)
+                    .padding(.vertical, 10)
+                    .background(Color(.secondarySystemGroupedBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             }
-            .buttonStyle(.bordered)
+            .buttonStyle(.plain)
             .fullScreenCover(isPresented: $isEnteringSpend) {
                 SpendEntryView(context: context)
             }
         }
         .padding(.horizontal, 16)
+        .padding(.top, 12)
         .padding(.bottom, 8)
+        .background(Color(.systemGroupedBackground))
     }
 
     @ViewBuilder
@@ -85,6 +92,13 @@ struct EnvelopeListView: View {
         } else {
             ScrollView {
                 LazyVStack(spacing: 10) {
+                    Text("Заложено всего \(MoneyFormatter.string(from: totalPlanned))")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.top, 4)
+                        .padding(.bottom, 2)
+
                     ForEach(envelopes) { envelope in
                         Button {
                             route = .edit(envelope)
@@ -96,15 +110,6 @@ struct EnvelopeListView: View {
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
-            }
-            .safeAreaInset(edge: .top, spacing: 0) {
-                Text("Заложено всего \(MoneyFormatter.string(from: totalPlanned))")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 4)
-                    .background(Color(.systemGroupedBackground))
             }
         }
     }
