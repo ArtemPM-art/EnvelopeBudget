@@ -132,9 +132,8 @@ struct ShoppingEventView: View {
                 Text(draft.envelope.name)
                     .font(.headline)
                     .foregroundStyle(.primary)
-                    .lineLimit(1)
-                draftBadge
-                Spacer(minLength: 6)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 Text("−\(MoneyFormatter.string(from: draft.spend))")
                     .font(.headline)
                     .foregroundStyle(Color.ebOrange)
@@ -171,18 +170,6 @@ struct ShoppingEventView: View {
         .padding(14)
         .background(Color(.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-    }
-
-    private var draftBadge: some View {
-        Text("ЧЕРНОВИК")
-            .font(.caption2.weight(.semibold))
-            .lineLimit(1)
-            .fixedSize()
-            .foregroundStyle(.secondary)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 3)
-            .background(Color(.tertiarySystemGroupedBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
     }
 
     private var emptyCart: some View {
