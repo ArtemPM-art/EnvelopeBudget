@@ -7,7 +7,7 @@ struct EnvelopeBudgetApp: App {
 
     init() {
         do {
-            container = try ModelContainer(for: Envelope.self, Spend.self)
+            container = try ModelContainer(for: Envelope.self, Spend.self, ShoppingEvent.self)
         } catch {
             // Без хранилища приложение бессмысленно: конверты и траты негде держать.
             fatalError("Не удалось создать хранилище: \(error)")

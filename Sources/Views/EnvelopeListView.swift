@@ -7,8 +7,13 @@ struct EnvelopeListView: View {
     @Query(sort: \Envelope.createdAt, order: .forward)
     private var envelopes: [Envelope]
 
+    @Query private var activeEvents: [ShoppingEvent]
+
     @State private var route: EditorRoute?
     @State private var isEnteringSpend = false
+    @State private var shoppingEvent: ShoppingEvent?
+
+    private var hasActiveEvent: Bool { !activeEvents.isEmpty }
 
     var body: some View {
         NavigationStack {
@@ -26,26 +31,45 @@ struct EnvelopeListView: View {
                 }
                 .safeAreaInset(edge: .bottom) {
                     if !envelopes.isEmpty {
-                        Button {
-                            isEnteringSpend = true
-                        } label: {
-                            Label("Внести трату", systemImage: "cart.badge.plus")
-                                .font(.headline)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 6)
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .padding(.horizontal, 16)
-                        .padding(.bottom, 8)
+                        bottomActions
                     }
                 }
         }
         .sheet(item: $route) { route in
             EnvelopeEditorView(mode: route.mode, context: context)
         }
-        .fullScreenCover(isPresented: $isEnteringSpend) {
-            SpendEntryView(context: context)
+    }
+
+    private var bottomActions: some View {
+        VStack(spacing: 10) {
+            Button {
+                startOrContinueShopping()
+            } label: {
+                Label(hasActiveEvent ? "Продолжить шопинг" : "Начать шопинг", systemImage: "cart")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+            }
+            .buttonStyle(.borderedProminent)
+            .fullScreenCover(item: $shoppingEvent) { event in
+                ShoppingEventView(event: event, context: context)
+            }
+
+            Button {
+                isEnteringSpend = true
+            } label: {
+                Label("Внести одну трату", systemImage: "plus")
+                    .font(.subheadline.weight(.medium))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 4)
+            }
+            .buttonStyle(.bordered)
+            .fullScreenCover(isPresented: $isEnteringSpend) {
+                SpendEntryView(context: context)
+            }
         }
+        .padding(.horizontal, 16)
+        .padding(.bottom, 8)
     }
 
     @ViewBuilder
@@ -83,6 +107,17 @@ struct EnvelopeListView: View {
                     .background(Color(.systemGroupedBackground))
             }
         }
+    }
+
+    private func startOrContinueShopping() {
+        if let active = activeEvents.first {
+            shoppingEvent = active
+            return
+        }
+        let event = ShoppingEvent()
+        context.insert(event)
+        try? context.save()
+        shoppingEvent = event
     }
 
     private var totalPlanned: Decimal {

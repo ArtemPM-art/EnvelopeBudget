@@ -11,6 +11,9 @@ final class SpendFormViewModel {
         case edit(Spend)
     }
 
+    /// Если задано — новая трата попадёт в корзину этого события (черновик).
+    private let event: ShoppingEvent?
+
     /// Строка вводимой суммы в целых рублях (без разделителей).
     var amountText: String = ""
 
@@ -25,9 +28,10 @@ final class SpendFormViewModel {
     private let mode: Mode
     private let context: ModelContext
 
-    init(mode: Mode, context: ModelContext) {
+    init(mode: Mode, context: ModelContext, event: ShoppingEvent? = nil) {
         self.mode = mode
         self.context = context
+        self.event = event
 
         switch mode {
         case .create:
@@ -79,7 +83,7 @@ final class SpendFormViewModel {
         guard case .create = mode else { return false }
         guard let amount, amount > 0, let envelope = selectedEnvelope else { return false }
 
-        context.insert(Spend(amount: amount, envelope: envelope))
+        context.insert(Spend(amount: amount, envelope: envelope, event: event))
 
         guard commit(failureMessage: "Не удалось внести трату.") else { return false }
         amountText = ""

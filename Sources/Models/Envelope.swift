@@ -23,9 +23,12 @@ final class Envelope {
 }
 
 extension Envelope {
-    /// Сумма всех трат конверта. Меняется автоматически при вводе/правке/отмене трат.
+    /// Сумма фактических трат конверта. Черновые траты открытого события (event != nil)
+    /// не учитываются — деньги списываются только после оплаты события.
     var spentAmount: Decimal {
-        spends.reduce(0) { $0 + $1.amount }
+        spends.reduce(0) { partial, spend in
+            spend.event == nil ? partial + spend.amount : partial
+        }
     }
 
     var remainingAmount: Decimal {

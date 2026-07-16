@@ -25,18 +25,31 @@ final class Spend {
     /// Опционален на уровне схемы, но при вводе всегда заполнен.
     var envelope: Envelope?
 
+    /// Событие «шопинг», если трата — черновик корзины.
+    /// nil — обычная трата, сразу учтённая в бюджете конверта.
+    var event: ShoppingEvent?
+
     init(
         amount: Decimal,
         envelope: Envelope?,
+        event: ShoppingEvent? = nil,
         date: Date = .now,
         operationType: SpendOperationType = .expense,
         moneyType: SpendMoneyType = .regularIncome
     ) {
         self.amount = amount
         self.envelope = envelope
+        self.event = event
         self.date = date
         self.operationType = operationType
         self.moneyType = moneyType
         self.createdAt = .now
+    }
+}
+
+extension Spend {
+    /// Черновая трата — та, что ещё в корзине открытого события.
+    var isDraft: Bool {
+        event != nil
     }
 }
